@@ -39,7 +39,7 @@ async function getJson(url) {
     const res = await fetch(url, { headers: { "User-Agent": USER_AGENT, Accept: "application/json" } });
     if (res.status === 429) {
       const ra = res.headers.get("retry-after");
-      const secs = Number.isFinite(Number(ra)) ? Number(ra) : Math.max(0, (Date.parse(ra) - Date.now()) / 1000) || 60;
+      const secs = retryAfterSeconds(ra);
       console.warn(`  429 Too Many Requests — รอ ${secs}s ตาม Retry-After`);
       await sleep(secs * 1000);
       continue;
@@ -47,6 +47,15 @@ async function getJson(url) {
     if (!res.ok) throw new Error(`${url} → HTTP ${res.status}`);
     return res.json();
   }
+}
+
+// Retry-After เป็นวินาทีหรือ HTTP-date; ไม่มี header/อ่านไม่ได้ → รอ 60 วินาที
+// (เดิม Number(null) = 0 ทำให้ header หายแล้วยิงซ้ำทันที และวันที่ในอดีตกลับได้ 60 แทน 0)
+export function retryAfterSeconds(ra, now = Date.now()) {
+  const v = (ra ?? "").trim();
+  if (/^\d+$/.test(v)) return Number(v);
+  const t = /[a-z]/i.test(v) ? Date.parse(v) : NaN; // HTTP-date มีชื่อวัน/เดือนเสมอ; V8 อ่าน "120" เป็นปี 120
+  return Number.isFinite(t) ? Math.max(0, (t - now) / 1000) : 60;
 }
 
 // เวลาท้องถิ่นไทย (+07:00) แบบ ISO

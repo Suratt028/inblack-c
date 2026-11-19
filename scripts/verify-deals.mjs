@@ -11,7 +11,7 @@ const raw = JSON.parse(await readFile(path.join(ROOT, j.sources.raw_file), "utf8
 
 const fails = [];
 const check = (ok, msg) => { if (!ok) fails.push(msg); };
-const r2 = (x) => Math.round((x + Number.EPSILON) * 100) / 100;
+const r2 = (x) => Number(Math.round(Number(x.toPrecision(15) + "e2")) + "e-2"); // ปัดครึ่งขึ้นแบบไม่หลุดจากเศษ float
 
 const rate = raw.fx.rates.THB;
 check(j.fx.rate === rate, `fx.rate ${j.fx.rate} ≠ raw ${rate}`);
@@ -35,7 +35,8 @@ for (const d of j.deals) {
   check(d.normal_usd === Number(src.normalPrice), `${tag} normal_usd ${d.normal_usd} ≠ raw ${src.normalPrice}`);
   check(d.sale_thb === r2(d.sale_usd * rate), `${tag} sale_thb ${d.sale_thb} ≠ ${r2(d.sale_usd * rate)}`);
   check(d.normal_thb === r2(d.normal_usd * rate), `${tag} normal_thb ${d.normal_thb} ≠ ${r2(d.normal_usd * rate)}`);
-  const sv = r2((1 - d.sale_usd / d.normal_usd) * 100);
+  const sc = Math.round(d.sale_usd * 100), nc = Math.round(d.normal_usd * 100);
+  const sv = r2(((nc - sc) * 100) / nc);
   check(d.savings_percent === sv, `${tag} savings ${d.savings_percent} ≠ ${sv}`);
   check(Math.abs(sv - Number(src.savings)) < 0.01, `${tag} savings ต่างจาก API เกิน 0.01 (${src.savings})`);
   check(d.sale_usd < d.normal_usd, `${tag} ไม่ได้ลดราคาจริง`);

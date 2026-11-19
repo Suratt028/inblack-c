@@ -3,81 +3,140 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ที่มาของข้อมูล · ดีลเกมราคาบาท</title>
-  <meta name="description" content="อัตราแลกเปลี่ยน ที่มาของข้อมูล เวลาดึง และจุดผิดปกติที่จัดการแล้ว">
+  <title>ที่มาของข้อมูล · ราคาเกมเป็นบาท</title>
+  <meta name="description" content="อัตราแลกเปลี่ยน วันที่ของอัตรา ที่มาของข้อมูล เวลาดึง และจุดผิดปกติที่จัดการแล้ว">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Prompt:wght@600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header class="top">
+  <header class="site-head">
     <div class="wrap">
-      <a class="brand" href="./">ดีลเกมราคาบาท</a>
-      <nav>
-        <a href="./">ดีล</a>
-        <a href="data.html" aria-current="page">ข้อมูล</a>
+      <a class="logo" href="./"><span class="logo-mark" aria-hidden="true">฿</span><span class="logo-text">ราคาเกมเป็นบาท</span></a>
+      <nav class="nav" aria-label="เมนูหลัก">
+        <a href="./">ดีลทั้งหมด</a>
+        <a href="data.html" aria-current="page">ที่มาของข้อมูล</a>
       </nav>
     </div>
   </header>
 
   <main class="wrap">
-    <h1>ที่มาของข้อมูล</h1>
-    <p class="lede">ทุกตัวเลขบนเว็บอ่านจาก <a href="data/deals.json"><code>data/deals.json</code></a> ไฟล์เดียว และคำนวณซ้ำได้จากข้อมูลดิบ</p>
+    <section class="intro">
+      <span class="bar" aria-hidden="true"></span>
+      <h1>ที่มาของข้อมูล</h1>
+      <p class="lede">ตัวเลขทุกตัวบนเว็บมาจากไฟล์ <a href="data/deals.json"><code>data/deals.json</code></a> ซึ่งสร้างจากคำขอ API ไม่เกิน 5 ครั้ง หน้านี้บอกว่าใช้อัตราไหน ดึงเมื่อไร และจัดการข้อมูลผิดปกติอะไรไปแล้วบ้าง</p>
+    </section>
 
-    <div class="grid" id="stats"></div>
+    <section class="stats" aria-label="สรุปข้อมูล">
+      <div class="card stat hot"><span class="k">อัตราแลกเปลี่ยน</span><span class="v" id="s-rate">—</span><span class="s" id="s-rate-date"></span></div>
+      <div class="card stat"><span class="k">เวลาดึงข้อมูล</span><span class="v" id="s-date">—</span><span class="s" id="s-time"></span></div>
+      <div class="card stat"><span class="k">ดีลที่แสดง</span><span class="v" id="s-deals">—</span><span class="s" id="s-deals-note"></span></div>
+      <div class="card stat"><span class="k">คำขอ API ที่ใช้</span><span class="v" id="s-req">—</span><div class="meter" aria-hidden="true"><div id="s-meter" style="width:0"></div></div></div>
+    </section>
 
-    <h2>แหล่งข้อมูล</h2>
-    <section class="card"><dl class="kv" id="sources"></dl></section>
+    <div class="cols">
+      <section class="card card-pad" aria-labelledby="src-h">
+        <h2 id="src-h">แหล่งข้อมูล</h2>
+        <ol class="srcs" id="srcs"></ol>
+      </section>
 
-    <h2>วิธีคำนวณ</h2>
-    <section class="card"><dl class="kv" id="rules"></dl></section>
+      <section class="card card-pad" aria-labelledby="calc-h">
+        <h2 id="calc-h">วิธีคำนวณ</h2>
+        <pre class="formula">sale_thb   = round(sale_usd × rate, 2)
+normal_thb = round(normal_usd × rate, 2)
+savings_%  = round((1 − sale_usd ÷ normal_usd) × 100, 2)</pre>
+        <span class="ex-title" id="ex-title">ตัวอย่าง</span>
+        <div class="ex" id="ex"></div>
+        <p class="ex-note" id="ex-note"></p>
+      </section>
+    </div>
 
-    <h2>จุดผิดปกติที่จัดการแล้ว</h2>
-    <section class="card" id="issues"></section>
+    <section class="card clip" aria-labelledby="iss-h">
+      <div class="issues-head">
+        <h2 id="iss-h">จุดผิดปกติที่จัดการแล้ว</h2>
+        <a href="https://github.com/Suratt028/inblack-c/blob/main/DATA_ISSUES.md" rel="noopener">อ่าน DATA_ISSUES.md</a>
+      </div>
+      <div class="scroll-x">
+        <div class="issues" role="table" aria-label="จุดผิดปกติในข้อมูล">
+          <div class="irow dhead" role="row">
+            <span role="columnheader">ปัญหาที่พบ</span>
+            <span role="columnheader">ตัวอย่างในข้อมูลดิบ</span>
+            <span role="columnheader">วิธีจัดการ</span>
+            <span role="columnheader" class="r">สถานะ</span>
+          </div>
+          <div id="issues" role="rowgroup"></div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="page-foot">
+      <span id="foot-file">ไฟล์ข้อมูล: data/deals.json</span>
+      <a href="./">← กลับไปหน้าดีลทั้งหมด</a>
+    </footer>
   </main>
 
-  <footer class="wrap">
-    รายละเอียดเต็มอยู่ใน <code>DATA_ISSUES.md</code> และ <code>REVIEW.md</code> ใน repository
-  </footer>
-
   <script type="module">
-    import { loadDeals, fmtDate, fmtDateTime, el } from "./common.js";
+    import { loadDeals, fmtTHB, fmtUSD, fmtPct, fmtDate, el } from "./common.js";
     const $ = (id) => document.getElementById(id);
-    const stat = (k, v, s) => el("div", { class: "card stat" }, el("div", { class: "k", text: k }), el("div", { class: "v", text: v }), s && el("div", { class: "s", text: s }));
-    const kv = (dl, pairs) => dl.append(...pairs.flatMap(([k, v]) => [el("dt", { text: k }), el("dd", {}, v)]));
-    const link = (u) => el("a", { href: u, rel: "noopener", text: u });
+    const check = () => {
+      const s = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      s.setAttribute("aria-hidden", "true"); s.setAttribute("width", "12"); s.setAttribute("height", "12"); s.setAttribute("viewBox", "0 0 24 24");
+      s.innerHTML = '<path d="M5 12l5 5L20 7" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>';
+      return s;
+    };
+    const path = (u) => { const x = new URL(u); return x.pathname + x.search; };
 
     try {
       const d = await loadDeals();
-      $("stats").append(
-        stat("อัตราแลกเปลี่ยน", `1 USD = ${d.fx.rate} THB`, `${d.fx.base} → ${d.fx.quote}`),
-        stat("วันที่ของอัตรา", fmtDate(d.fx.rate_date), d.fx.rate_date),
-        stat("เวลาดึงข้อมูล", fmtDateTime(d.generated_at), d.generated_at),
-        stat("ดีลที่แสดง", `${d.stats.published} ดีล`, `จาก ${d.stats.raw_deals} ดีลดิบ · ${d.stats.unique_games} เกมไม่ซ้ำ`)
-      );
-      kv($("sources"), [
-        ["ดีลเกม", link(d.sources.deals)],
-        ["รายชื่อร้าน", link(d.sources.stores)],
-        ["อัตราแลกเปลี่ยน", link(d.fx.source_url)],
-        ["จำนวนคำขอ", `${d.sources.request_count} คำขอ (เพดาน 5)`],
-        ["User-Agent", el("code", { text: d.sources.user_agent })],
-        ["ข้อมูลดิบ", el("code", { text: d.sources.raw_file })],
-      ]);
-      kv($("rules"), [
-        ["ราคาบาท", d.rules.thb],
-        ["ส่วนลด", el("code", { text: d.rules.savings_percent })],
-        ["การคัดเลือก", d.rules.selection],
-      ]);
-      $("issues").append(...d.data_issues.map((i) =>
-        el("div", { class: "issue" },
-          el("h3", {}, i.title, el("span", { class: `pill ${i.affected ? "" : "zero"}`, text: `${i.affected} รายการ` })),
-          el("p", { text: "จัดการ: " + i.handling }),
-          i.examples.length ? el("ul", {}, i.examples.map((x) => el("li", { text: x }))) : el("p", { text: "รอบนี้ไม่พบ — ตัวกรองยังทำงานทุกครั้งที่ดึงข้อมูล" })
-        )
-      ));
+      const t = new Date(d.generated_at);
+      $("s-rate").textContent = `฿${d.fx.rate}`;
+      $("s-rate-date").textContent = `ต่อ 1 ${d.fx.base} · อัตราวันที่ ${fmtDate(d.fx.rate_date)}`;
+      $("s-date").textContent = fmtDate(d.generated_at);
+      $("s-time").textContent = t.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Bangkok" }) + " น. (UTC+07:00)";
+      $("s-deals").textContent = `${d.deals.length} ดีล`;
+      $("s-deals-note").textContent = `จาก ${d.stats.raw_deals} ดีลดิบ · ${d.stats.unique_games} เกมไม่ซ้ำ · ร้านที่เปิดอยู่เท่านั้น`;
+      $("s-req").replaceChildren(String(d.sources.request_count), " ", el("small", { text: "/ 5 คำขอ" }));
+      $("s-meter").style.width = `${Math.min(100, (d.sources.request_count / 5) * 100)}%`;
+
+      const srcs = [
+        ["CheapShark — รายชื่อร้าน", d.sources.stores, "ใช้เช็กว่าร้านไหนยังเปิดอยู่ (isActive) และใช้ชื่อร้าน"],
+        ["CheapShark — ดีล", d.sources.deals, "ส่ง User-Agent บอกชื่อแอป · ถ้าได้ 429 จะหยุดรอตาม Retry-After"],
+        ["Frankfurter — อัตรา USD → THB", d.fx.source_url, "ใช้วันที่ของอัตราตามที่ API ส่งกลับ ไม่ใช่วันที่ดึง"],
+      ];
+      $("srcs").replaceChildren(...srcs.map(([title, url, note], i) =>
+        el("li", {}, el("span", { class: "n", "aria-hidden": "true", text: i + 1 }),
+          el("div", { class: "body" },
+            el("span", { class: "title", text: title }),
+            el("a", { href: url, rel: "noopener" }, el("code", { text: `GET ${path(url)}` })),
+            el("span", { class: "note", text: note })))));
+      $("srcs").append(el("li", {}, el("span", { class: "n", "aria-hidden": "true", text: "UA" }),
+        el("div", { class: "body" }, el("span", { class: "title", text: "User-Agent ที่ส่ง" }), el("code", { text: d.sources.user_agent }),
+          el("span", { class: "note" }, "ข้อมูลดิบเก็บที่ ", el("code", { text: d.sources.raw_file })))));
+
+      // ตัวอย่างจากดีลแรกที่ไม่ฟรีจริง (ค่าทุกตัวอ่านจาก JSON)
+      const ex = d.deals.find((x) => !x.is_free) ?? d.deals[0];
+      $("ex-title").textContent = `ตัวอย่างจากข้อมูลจริง: ${ex.title} (${ex.store_name})`;
+      const box = (k, v) => el("div", {}, el("span", { class: "k", text: k }), el("span", { class: "v", text: v }));
+      $("ex").replaceChildren(
+        box("ปกติ", `${fmtUSD(ex.normal_usd)} → ${fmtTHB(ex.normal_thb)}`),
+        box("ลดเหลือ", `${fmtUSD(ex.sale_usd)} → ${fmtTHB(ex.sale_thb)}`),
+        box("ส่วนลด", fmtPct(ex.savings_percent)));
+      $("ex-note").textContent = `${ex.sale_usd} × ${d.fx.rate} → ${ex.sale_thb} · ค่า savings จาก API คือ ${ex.savings_percent_api}`;
+
+      $("issues").replaceChildren(...d.data_issues.map((i) =>
+        el("div", { class: "irow", role: "row" },
+          el("span", { class: "t", role: "cell", text: i.title }),
+          el("div", { class: "ex-list", role: "cell" },
+            i.examples.length ? i.examples.slice(0, 3).map((x) => el("code", { text: x })) : el("span", { class: "none", text: "รอบนี้ไม่พบ — ตัวกรองยังทำงานทุกครั้งที่ดึงข้อมูล" })),
+          el("span", { class: "fix", role: "cell", text: i.handling }),
+          el("div", { class: "status", role: "cell" },
+            i.affected ? el("span", { class: "ok" }, check(), "แก้แล้ว") : el("span", { class: "ok idle", text: "เฝ้าระวัง" }),
+            el("span", { class: "affected", text: `${i.affected} รายการ` })))));
+
+      $("foot-file").textContent = `ไฟล์ข้อมูล: data/deals.json · generated_at ${d.generated_at}`;
     } catch (e) {
-      $("stats").textContent = e.message;
+      $("s-rate").textContent = e.message;
     }
   </script>
 </body>

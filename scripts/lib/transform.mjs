@@ -2,7 +2,14 @@
 // แยกออกมาเป็นฟังก์ชันบริสุทธิ์ (ไม่ยิง network) เพื่อให้รันซ้ำจาก raw ได้และทดสอบได้
 // ทุกจุดผิดปกติที่จัดการจะถูกนับและบันทึกลง data_issues (แสดงบน /data.html และอธิบายใน DATA_ISSUES.md)
 
-export const round2 = (x) => Math.round((x + Number.EPSILON) * 100) / 100;
+// ปัดครึ่งขึ้น 2 ตำแหน่ง: ตัดเศษ float ด้วย toPrecision(15) ก่อน แล้วเลื่อนจุดผ่านสตริง "e2"
+// (เดิม Math.round((x + EPSILON) * 100) ปัด 3.80 × 33.975 = 129.105 เป็น 129.10 แทน 129.11)
+export const round2 = (x) => Number(Math.round(Number(x.toPrecision(15) + "e2")) + "e-2");
+// ส่วนลดคิดจากเซนต์ (จำนวนเต็ม) เพื่อเลี่ยงเศษจาก 1 − sale/normal เช่น 11.13/11.20 = 0.625% ต้องได้ 0.63
+export const savingsPct = (sale, normal) => {
+  const s = Math.round(sale * 100), n = Math.round(normal * 100);
+  return round2(((n - s) * 100) / n);
+};
 
 export const CHEAPSHARK_REDIRECT = "https://www.cheapshark.com/redirect?dealID=";
 
@@ -96,7 +103,7 @@ export function transform(raw, { count = 20 } = {}) {
   // 4) สร้างผลลัพธ์ (ข้อ savings/free นับเฉพาะดีลที่เผยแพร่; ข้ออื่นนับจาก raw ทั้งหมด)
   const deals = chosen.map(({ d, store, sale, normal }) => {
     const title = cleanTitle(d.title);
-    const savings = round2((1 - sale / normal) * 100);
+    const savings = savingsPct(sale, normal);
     if (String(d.savings) !== savings.toFixed(2)) note("savings_precision", `${title}: API "${d.savings}" → ${savings}`);
     const isFree = sale === 0;
     if (isFree) note("free_game", `${title} @ ${store.storeName} (ปกติ $${d.normalPrice})`);

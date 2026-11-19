@@ -69,3 +69,31 @@ Frankfurter คืน `{"date":"2026-11-18","rates":{"THB":33.975}}` ทั้�
 ## 7. ชื่อเกมถูกตัดเครื่องหมาย (ไม่แก้)
 
 `Sid Meiers Civilization VI Anthology`, `Assassins Creed Origins Gold Edition` — apostrophe หายไปจากต้นทาง (หายไม่สม่ำเสมอ: `Deus Ex: Human Revolution - Director's Cut` ยังมี `'` อยู่) เดาคืนอัตโนมัติไม่ได้อย่างปลอดภัย (เช่น `Assassins` อาจถูกจริงในบางชื่อ) จึงแสดงตามต้นทาง ส่วนการค้นหาบนเว็บเทียบแบบไม่สนเครื่องหมาย (`assassin's` ค้นเจอ `Assassins`)
+
+---
+
+## ผลตรวจโดย Agent ตรวจข้อมูล
+
+ตรวจซ้ำจาก `data/raw/2026-11-19/responses.json`, `scripts/lib/transform.mjs`, `data/deals.json`, `scripts/verify-deals.mjs`, `site/common.js` ด้วยสคริปต์ node ในเครื่อง (ไม่ยิง network)
+
+| # | ผล | รายละเอียด |
+|---|---|---|
+| ขั้นตอน | ✓ | 60 → 60 → 48 → 20 ตรงกับ `stats` |
+| 1 | ✓ | 10 gameID ซ้ำ, ส่วนเกิน 12 แถว = `duplicate_game.affected` 12; ราคา/ร้านของ 306050, 250301, 293628 ตรง raw; ลำดับตัดสิน sale → dealRating → storeID ตรงโค้ด; ทุกคู่ซ้ำมี `normalPrice` เท่ากันทุกร้าน |
+| 2 | ✓ / ✗ แก้ | 5 แถว 3 ชื่อ ตรง `title_whitespace` 5 และไม่ติด 20 อันดับจริง — แก้ข้ออ้างว่า "ค้นหาไม่เจอ": `norm()` ยุบช่องว่างอยู่แล้ว เว็บจึงค้นเจอ |
+| 3 | ✓ / ✗ แก้ | ดีล $0 มี 1 แถว (gameID 326980, store 25) = `free_game` 1 — แก้เหตุผลอันดับ 1: ทั้ง 20 ดีลมี dealRating 10.0 อันดับ 1 มาจากตัวตัดสินส่วนลด |
+| 4 | ✓ / ✗ แก้ | 60/60 แถวเป็นสตริง 6 ตำแหน่ง; `data_issues` นับ 20 (เฉพาะที่เผยแพร่) — เพิ่มหมายเหตุในตาราง; ค่า API ต่างจากที่คำนวณได้สูงสุด ~5e-7 ส่วน `verify-deals.mjs` ตรวจ < 0.01 จริง |
+| 5 | ✓ (บางส่วนตรวจไม่ได้) | `fx.date` 2026-11-18 (วันพุธ) และดึงตอน 07:46 UTC = 08:46 CET ตรง; เวลาออกอัตราของ ECB ~16:00 CET เป็นข้อมูลภายนอก ตรวจจากไฟล์ไม่ได้ |
+| 6 | ✓ | 22/35 ร้าน `isActive: 0` (มี Amazon, GameStop, Origin, Voidu); 0 ดีลจากร้านปิด = `inactive_store` 0; verify ตรวจ `isActive === 1` |
+| 7 | ✓ / ✗ แก้ | จาก "หลายรายการ" แก้เป็น 2 แถว ไม่ติด 20 อันดับ ไม่มีใน `data_issues`; เพิ่มว่า `Director's Cut` ยังมี `'` (ต้นทางตัดไม่สม่ำเสมอ); `norm()` ลบ `'` จริง (`assassin's` → `assassins`) |
+
+### จุดผิดปกติที่เอกสารยังไม่ได้ระบุ (เป็นข้อเสนอ ยังไม่แก้โค้ด)
+
+1. **dealRating ตันที่ 10.0** — มี 32 เกม (หลังรวมเกมซ้ำ) ที่ rating 10.0 ทั้ง 20 ดีลที่เผยแพร่เป็น 10.0 หมด ลำดับจริงจึงถูกตัดสินด้วยส่วนลด และเส้นตัดที่ 88.14% (`Darksiders Blades and Whip Franchise Pack`) ตัด `Need for Speed Unbound Palace Edition` (88.01%) และ `THE KING OF FIGHTERS XIV ... DELUXE PACK` (87.55%) ซึ่งก็เป็น 10.0 ออกไป ส่วน `Shadow Tactics: Blades of the Shogun` ลด 93.77% แต่ rating 9.9 จึงไม่ติด (dealRating ไม่ได้ขึ้นตาม savings อย่างเดียว)
+2. **ฉบับต่างกันของเกมเดียวกันติด 20 อันดับพร้อมกัน** — `Suicide Squad` 273928 + 278533 (อันดับ 3, 5) และ `Back 4 Blood: Deluxe` 235448 + `Ultimate` 235447 (อันดับ 16, 18)
+3. **ไม่มีภาพปก** — `Dead Space Digital Deluxe Edition` (251698, อันดับ 11) `thumb` = `https://www.cheapshark.com/img/default_box_art.png`
+4. **ช่องว่างหน้าเครื่องหมาย** — `Rims Racing : Ultimate Edition` (233561, อันดับ 6) มี ` :` ซึ่ง `cleanTitle` ไม่ได้แก้
+5. **ภาพปกมาจาก CDN ของร้านอื่น** — ดีล WinGameStore หลายรายการใช้ภาพจาก gamersgate / fanatical / humblebundle / greenmangaming (เช่น Hogwarts 250301 → `cdn.fanatical.com`) เป็นเรื่องความสวยงามเท่านั้น
+6. **ข้อมูลเสริมว่างเป็นส่วนใหญ่** — ใน raw 60 แถว `steamAppID` null 42 แถว, `releaseDate` 0 42 แถว, `metacriticScore` "0" 48 แถว (โค้ดแปลง metacritic 0 → null แล้ว แต่ไม่ได้บันทึกเป็น issue); ใน 20 ดีลมีแค่ 5 รายการที่มี `steamAppID`
+7. **releaseDate ในอนาคต** — `GRAVEN` (221635) = 2026-12-31 (ไม่ติด 20 อันดับ); `lastChange` ไม่มีแถวไหนเกินเวลาที่ดึง
+8. **ดีลอันดับ 1 ไม่มีสัญญาณคุณภาพอื่น** — `Contractor: The Clean Up Part II` ไม่มี metacritic, steam rating และ steamAppID เลย แต่ได้ dealRating 10.0

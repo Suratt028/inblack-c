@@ -1,0 +1,22 @@
+{
+  "fetched_at": "2026-11-19T17:04:57+07:00",
+  "user_agent": "inblack-c-thb-deals/1.0 (review)",
+  "request_count": 3,
+  "requests": [
+    {
+      "url": "https://www.cheapshark.com/api/1.0/deals?id=GQYhHzOtQcCuICwD5sXBHG91ZHdsyxYRQbVgR%2Bs4Kbc%3D",
+      "status": "HTTP/1.1 200 OK",
+      "saved_as": "cheapshark-deal-2.json"
+    },
+    {
+      "url": "https://www.cheapshark.com/api/1.0/deals?id=jUIksCf7OKL1gDeMjhT%2Fx%2Bi7HWhFLcE2qWzPWrrvzmI%3D",
+      "status": "HTTP/1.1 200 OK",
+      "saved_as": "cheapshark-deal-20.json"
+    },
+    {
+      "url": "https://api.frankfurter.dev/v1/latest?base=USD&symbols=THB",
+      "status": "HTTP/1.1 200 OK",
+      "saved_as": "frankfurter-latest.json"
+    }
+  ]
+}
