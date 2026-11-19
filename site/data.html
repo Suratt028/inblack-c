@@ -100,16 +100,17 @@ savings_%  = round((1 − sale_usd ÷ normal_usd) × 100, 2)</pre>
       $("s-meter").style.width = `${Math.min(100, (d.sources.request_count / 5) * 100)}%`;
 
       const srcs = [
-        ["CheapShark — รายชื่อร้าน", d.sources.stores, "ใช้เช็กว่าร้านไหนยังเปิดอยู่ (isActive) และใช้ชื่อร้าน"],
-        ["CheapShark — ดีล", d.sources.deals, "ส่ง User-Agent บอกชื่อแอป · ถ้าได้ 429 จะหยุดรอตาม Retry-After"],
-        ["Frankfurter — อัตรา USD → THB", d.fx.source_url, "ใช้วันที่ของอัตราตามที่ API ส่งกลับ ไม่ใช่วันที่ดึง"],
+        ["CheapShark — รายชื่อร้าน", d.sources.stores, "ใช้เช็กว่าร้านไหนยังเปิดอยู่ (isActive) และใช้ชื่อร้าน", "https://apidocs.cheapshark.com/"],
+        ["CheapShark — ดีล", d.sources.deals, "ส่ง User-Agent บอกชื่อแอป · ถ้าได้ 429 จะหยุดรอตาม Retry-After", "https://apidocs.cheapshark.com/"],
+        ["Frankfurter — อัตรา USD → THB", d.fx.source_url, "ใช้วันที่ของอัตราตามที่ API ส่งกลับ ไม่ใช่วันที่ดึง", "https://frankfurter.dev/"],
       ];
-      $("srcs").replaceChildren(...srcs.map(([title, url, note], i) =>
+      $("srcs").replaceChildren(...srcs.map(([title, url, note, docs], i) =>
         el("li", {}, el("span", { class: "n", "aria-hidden": "true", text: i + 1 }),
           el("div", { class: "body" },
             el("span", { class: "title", text: title }),
             el("a", { href: url, rel: "noopener" }, el("code", { text: `GET ${path(url)}` })),
-            el("span", { class: "note", text: note })))));
+            el("span", { class: "note", text: note }),
+            el("a", { class: "note", href: docs, rel: "noopener", text: "เอกสาร API →" })))));
       $("srcs").append(el("li", {}, el("span", { class: "n", "aria-hidden": "true", text: "UA" }),
         el("div", { class: "body" }, el("span", { class: "title", text: "User-Agent ที่ส่ง" }), el("code", { text: d.sources.user_agent }),
           el("span", { class: "note" }, "ข้อมูลดิบเก็บที่ ", el("code", { text: d.sources.raw_file })))));

@@ -55,6 +55,7 @@ npm run verify                         # ตรวจทุกตัวเลข
 - ส่ง `User-Agent: inblack-c-thb-deals/1.0 (…)` ทุกคำขอ ถ้าได้ 429 หยุดรอตาม `Retry-After`
 - ลิงก์ดีลใช้ `https://www.cheapshark.com/redirect?dealID=…` ไม่มี affiliate อื่น
 - ไม่มี API key — ทั้งสอง API เปิดสาธารณะ
+- เอกสาร API: [CheapShark](https://apidocs.cheapshark.com/) (endpoint `/stores`, `/deals`, กติกา User-Agent / 429 / ลิงก์ redirect) · [Frankfurter](https://frankfurter.dev/) (endpoint `/v1/latest`)
 
 ### เว็บ
 
