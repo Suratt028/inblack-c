@@ -16,4 +16,8 @@
 
 ## GitHub Pages
 
-ก่อน push พบว่า repository เป็น Public แต่ยังไม่มี GitHub Actions run, Pages endpoint ยังไม่ตั้งค่า และ URL ที่ระบุใน README ตอบ HTTP 404 ต้องตรวจซ้ำหลัง push และเปิดใช้ Pages แบบ GitHub Actions หากจำเป็น
+เปิดใช้ Pages แบบ GitHub Actions แล้ว push ขึ้น `main`; workflow run `44488071486` ผ่านทั้ง build และ deploy. ตรวจ URL จริงหลัง deploy ได้ HTTP 200 และ `data/deals.json` ที่เผยแพร่มี 20 ดีล
+
+## ข้อจำกัดของรอบตรวจ
+
+งานตรวจแยกสองรายการที่ส่งให้ sub-agent ไม่เริ่มทำงาน เพราะ runtime ตอบ `400 The requested model is not supported`; จึงไม่มีผลตรวจจาก sub-agent ให้อ้างอิง และการตรวจข้างต้นเป็นการตรวจโดยตรงพร้อมตัวตรวจอิสระใน repository. Plugin แยกต่างหากที่ระบุใน `AGENT_SETUP.md` ไม่พร้อมใช้งานในเซสชันนี้ จึงไม่มีหลักฐานการเรียก plugin.
