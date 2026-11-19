@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ดีลเกมราคาบาท</title>
+  <meta name="description" content="20 ดีลเกมลดราคาจาก CheapShark แปลงเป็นเงินบาทด้วยอัตรา Frankfurter">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="./">ดีลเกมราคาบาท</a>
+      <nav>
+        <a href="./" aria-current="page">ดีล</a>
+        <a href="data.html">ข้อมูล</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1>เกมลดราคา 20 ดีล เป็นเงินบาท</h1>
+    <p class="lede" id="lede">กำลังโหลด…</p>
+
+    <section class="card">
+      <div class="toolbar">
+        <input id="q" type="search" placeholder="ค้นหาชื่อเกม…" autocomplete="off" aria-label="ค้นหาชื่อเกม">
+        <select id="store" aria-label="กรองร้าน"><option value="">ทุกร้าน</option></select>
+        <span class="count" id="count" aria-live="polite"></span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th data-key="title"><button type="button">เกม</button></th>
+              <th data-key="store_name"><button type="button">ร้าน</button></th>
+              <th class="num hide-sm" data-key="normal_thb"><button type="button">ราคาปกติ</button></th>
+              <th class="num" data-key="sale_thb"><button type="button">ลดเหลือ</button></th>
+              <th class="num" data-key="savings_percent"><button type="button">ลด</button></th>
+              <th><span class="hide-sm">ลิงก์</span></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <p class="foot-note" id="fx"></p>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    ข้อมูลดีลจาก <a href="https://www.cheapshark.com" rel="noopener">CheapShark</a> · อัตราแลกเปลี่ยนจาก <a href="https://frankfurter.dev" rel="noopener">Frankfurter</a> (ECB) · ลิงก์ทุกดีลผ่าน CheapShark redirect
+  </footer>
+
+  <script type="module">
+    import { loadDeals, fmtTHB, fmtUSD, fmtPct, fmtDate, fmtDateTime, norm, el } from "./common.js";
+
+    const $ = (id) => document.getElementById(id);
+    let data, sortKey = null, sortDir = 1;
+
+    function row(d) {
+      return el("tr", {},
+        el("td", {}, el("div", { class: "game" },
+          el("img", { src: d.thumb, alt: "", loading: "lazy", width: 64, height: 30 }),
+          el("span", { text: d.title }))),
+        el("td", { class: "store", text: d.store_name }),
+        el("td", { class: "num hide-sm" }, el("span", { class: "normal", title: fmtUSD(d.normal_usd), text: fmtTHB(d.normal_thb) })),
+        el("td", { class: "num" }, d.is_free
+          ? el("span", { class: "pill free", title: fmtUSD(d.sale_usd), text: "ฟรี" })
+          : el("span", { class: "sale", title: fmtUSD(d.sale_usd), text: fmtTHB(d.sale_thb) })),
+        el("td", { class: "num" }, el("span", { class: "pill", text: fmtPct(d.savings_percent) })),
+        el("td", {}, el("a", { class: "go", href: d.cheapshark_url, target: "_blank", rel: "noopener", "aria-label": `ไปที่ดีล ${d.title} ผ่าน CheapShark`, text: "ดูดีล →" }))
+      );
+    }
+
+    function render() {
+      const q = norm($("q").value);
+      const store = $("store").value;
+      let rows = data.deals.filter((d) => (!q || norm(d.title).includes(q)) && (!store || d.store_id === store));
+      if (sortKey) {
+        rows = [...rows].sort((a, b) => {
+          const x = a[sortKey], y = b[sortKey];
+          return (typeof x === "number" ? x - y : String(x).localeCompare(String(y))) * sortDir;
+        });
+      }
+      $("rows").replaceChildren(...(rows.length ? rows.map(row) : [el("tr", {}, el("td", { colspan: 6, class: "empty", text: "ไม่พบเกมที่ตรงกับคำค้น" }))]));
+      $("count").textContent = `${rows.length} / ${data.deals.length} ดีล`;
+      for (const th of document.querySelectorAll("th[data-key]"))
+        th.setAttribute("aria-sort", th.dataset.key === sortKey ? (sortDir > 0 ? "ascending" : "descending") : "none");
+    }
+
+    try {
+      data = await loadDeals();
+      const stores = [...new Map(data.deals.map((d) => [d.store_id, d.store_name]))].sort((a, b) => a[1].localeCompare(b[1]));
+      $("store").append(...stores.map(([id, name]) => el("option", { value: id, text: name })));
+      $("lede").textContent = `ดึงข้อมูลเมื่อ ${fmtDateTime(data.generated_at)} · เลือกจาก ${data.stats.raw_deals} ดีลดิบ รวมเกมซ้ำให้เหลือร้านที่ถูกที่สุด`;
+      $("fx").replaceChildren(
+        `อัตรา 1 USD = ${data.fx.rate} บาท วันที่ ${fmtDate(data.fx.rate_date)} · ชี้ราคาบาทเพื่อดูราคา USD · `,
+        el("a", { href: "data.html", text: "ที่มาและจุดผิดปกติที่จัดการแล้ว" })
+      );
+      $("q").addEventListener("input", render);
+      $("store").addEventListener("change", render);
+      for (const th of document.querySelectorAll("th[data-key] button"))
+        th.addEventListener("click", () => {
+          const k = th.parentElement.dataset.key;
+          if (sortKey === k) sortDir = -sortDir; else { sortKey = k; sortDir = k === "savings_percent" ? -1 : 1; }
+          render();
+        });
+      render();
+    } catch (e) {
+      $("lede").textContent = e.message;
+    }
+  </script>
+</body>
+</html>

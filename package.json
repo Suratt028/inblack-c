@@ -1,0 +1,22 @@
+{
+  "name": "inblack-c",
+  "version": "1.0.0",
+  "description": "เว็บราคาเกมลดราคาเป็นเงินบาท (CheapShark + Frankfurter) พร้อม MCP tool search_deals",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "fetch": "node scripts/fetch-deals.mjs",
+    "verify": "node scripts/verify-deals.mjs",
+    "mcp": "node mcp/server.mjs",
+    "test:mcp": "node scripts/test-mcp.mjs",
+    "build:site": "node scripts/build-site.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "express": "^5.3.0",
+    "zod": "^4.6.7"
+  }
+}

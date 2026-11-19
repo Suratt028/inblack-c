@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ที่มาของข้อมูล · ดีลเกมราคาบาท</title>
+  <meta name="description" content="อัตราแลกเปลี่ยน ที่มาของข้อมูล เวลาดึง และจุดผิดปกติที่จัดการแล้ว">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <a class="brand" href="./">ดีลเกมราคาบาท</a>
+      <nav>
+        <a href="./">ดีล</a>
+        <a href="data.html" aria-current="page">ข้อมูล</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1>ที่มาของข้อมูล</h1>
+    <p class="lede">ทุกตัวเลขบนเว็บอ่านจาก <a href="data/deals.json"><code>data/deals.json</code></a> ไฟล์เดียว และคำนวณซ้ำได้จากข้อมูลดิบ</p>
+
+    <div class="grid" id="stats"></div>
+
+    <h2>แหล่งข้อมูล</h2>
+    <section class="card"><dl class="kv" id="sources"></dl></section>
+
+    <h2>วิธีคำนวณ</h2>
+    <section class="card"><dl class="kv" id="rules"></dl></section>
+
+    <h2>จุดผิดปกติที่จัดการแล้ว</h2>
+    <section class="card" id="issues"></section>
+  </main>
+
+  <footer class="wrap">
+    รายละเอียดเต็มอยู่ใน <code>DATA_ISSUES.md</code> และ <code>REVIEW.md</code> ใน repository
+  </footer>
+
+  <script type="module">
+    import { loadDeals, fmtDate, fmtDateTime, el } from "./common.js";
+    const $ = (id) => document.getElementById(id);
+    const stat = (k, v, s) => el("div", { class: "card stat" }, el("div", { class: "k", text: k }), el("div", { class: "v", text: v }), s && el("div", { class: "s", text: s }));
+    const kv = (dl, pairs) => dl.append(...pairs.flatMap(([k, v]) => [el("dt", { text: k }), el("dd", {}, v)]));
+    const link = (u) => el("a", { href: u, rel: "noopener", text: u });
+
+    try {
+      const d = await loadDeals();
+      $("stats").append(
+        stat("อัตราแลกเปลี่ยน", `1 USD = ${d.fx.rate} THB`, `${d.fx.base} → ${d.fx.quote}`),
+        stat("วันที่ของอัตรา", fmtDate(d.fx.rate_date), d.fx.rate_date),
+        stat("เวลาดึงข้อมูล", fmtDateTime(d.generated_at), d.generated_at),
+        stat("ดีลที่แสดง", `${d.stats.published} ดีล`, `จาก ${d.stats.raw_deals} ดีลดิบ · ${d.stats.unique_games} เกมไม่ซ้ำ`)
+      );
+      kv($("sources"), [
+        ["ดีลเกม", link(d.sources.deals)],
+        ["รายชื่อร้าน", link(d.sources.stores)],
+        ["อัตราแลกเปลี่ยน", link(d.fx.source_url)],
+        ["จำนวนคำขอ", `${d.sources.request_count} คำขอ (เพดาน 5)`],
+        ["User-Agent", el("code", { text: d.sources.user_agent })],
+        ["ข้อมูลดิบ", el("code", { text: d.sources.raw_file })],
+      ]);
+      kv($("rules"), [
+        ["ราคาบาท", d.rules.thb],
+        ["ส่วนลด", el("code", { text: d.rules.savings_percent })],
+        ["การคัดเลือก", d.rules.selection],
+      ]);
+      $("issues").append(...d.data_issues.map((i) =>
+        el("div", { class: "issue" },
+          el("h3", {}, i.title, el("span", { class: `pill ${i.affected ? "" : "zero"}`, text: `${i.affected} รายการ` })),
+          el("p", { text: "จัดการ: " + i.handling }),
+          i.examples.length ? el("ul", {}, i.examples.map((x) => el("li", { text: x }))) : el("p", { text: "รอบนี้ไม่พบ — ตัวกรองยังทำงานทุกครั้งที่ดึงข้อมูล" })
+        )
+      ));
+    } catch (e) {
+      $("stats").textContent = e.message;
+    }
+  </script>
+</body>
+</html>

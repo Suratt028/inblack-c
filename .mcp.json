@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "inblack-c-deals": {
+      "type": "http",
+      "url": "http://localhost:3000/mcp"
+    }
+  }
+}
