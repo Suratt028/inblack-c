@@ -38,7 +38,7 @@ npm run test:mcp
 | อาร์กิวเมนต์ | ชนิด | ความหมาย |
 |---|---|---|
 | `query` | string | คำในชื่อเกม (ไม่สนตัวพิมพ์และเครื่องหมาย) |
-| `store` | string | ชื่อร้านหรือ store_id เช่น `GOG`, `25` |
+| `store` | string | `store_id` หรือชื่อร้าน (ตรงทั้งชื่อ หรือคำขึ้นต้นครบคำ) เช่น `GOG`, `Epic`, `25` |
 | `max_price_thb` | number | ราคาลดสูงสุด (บาท) |
 | `min_savings` | number | ส่วนลดขั้นต่ำ (%) |
 | `sort` | `savings` \| `price` \| `rating` | ค่าเริ่มต้น `savings` |

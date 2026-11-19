@@ -16,13 +16,25 @@ const PORT = Number(process.env.PORT || 3000);
 // ค้นหาแบบไม่สนตัวพิมพ์/เครื่องหมาย (เหมือนหน้าเว็บ): "assassin's" เจอ "Assassins"
 const norm = (x) => String(x).toLowerCase().replace(/['’]/g, "").replace(/[^\p{L}\p{M}\p{N}]+/gu, " ").trim();
 
+// ช่องว่างล้วน/ไม่ส่ง = ไม่กรอง; มีข้อความแต่ normalize แล้วว่าง (เช่น "!!!") = ไม่ตรงอะไรเลย (D3)
+const filterTerm = (x) => (x == null || String(x).trim() === "" ? null : norm(x));
+
+// ร้าน: ตรง store_id พอดี หรือชื่อร้านขึ้นต้นด้วยคำที่ค้นแบบครบคำ (D4)
+// "epic" / "epic games" → Epic Games Store, "25" → store 25, แต่ "e" ไม่ตรงทุกร้านที่มีตัว e
+function storeMatches(d, raw, s) {
+  if (s === "") return false;
+  if (d.store_id === String(raw).trim()) return true;
+  const name = norm(d.store_name);
+  return name === s || name.startsWith(s + " ");
+}
+
 export async function searchDeals({ query, store, max_price_thb, min_savings, sort = "savings", limit = 10 } = {}) {
   const data = JSON.parse(await readFile(DATA, "utf8"));
-  const q = query ? norm(query) : "";
-  const s = store?.trim().toLowerCase();
+  const q = filterTerm(query);
+  const s = filterTerm(store);
   let rows = data.deals.filter((d) =>
-    (!q || norm(d.title).includes(q)) &&
-    (!s || d.store_name.toLowerCase().includes(s) || d.store_id === s) &&
+    (q === null || (q !== "" && norm(d.title).includes(q))) &&
+    (s === null || storeMatches(d, store, s)) &&
     (max_price_thb == null || d.sale_thb <= max_price_thb) &&
     (min_savings == null || d.savings_percent >= min_savings)
   );
@@ -56,7 +68,7 @@ function buildServer() {
         "ค้นหาดีลเกมลดราคาจาก data/deals.json (CheapShark, แปลงเป็นบาทด้วยอัตรา Frankfurter). กรองด้วยชื่อเกม ร้าน ราคาบาทสูงสุด หรือส่วนลดขั้นต่ำ แล้วเรียงตามส่วนลด ราคา หรือ dealRating",
       inputSchema: {
         query: z.string().optional().describe("คำในชื่อเกม (ไม่สนตัวพิมพ์)"),
-        store: z.string().optional().describe("ชื่อร้านหรือ store_id เช่น Steam, GOG, 25"),
+        store: z.string().optional().describe("store_id หรือชื่อร้าน (ตรงทั้งชื่อหรือคำขึ้นต้นครบคำ) เช่น GOG, Epic, 25"),
         max_price_thb: z.number().nonnegative().optional().describe("ราคาลดสูงสุด (บาท)"),
         min_savings: z.number().min(0).max(100).optional().describe("ส่วนลดขั้นต่ำ (%)"),
         sort: z.enum(["savings", "price", "rating"]).optional().describe("เรียงตาม: savings (ค่าเริ่มต้น), price, rating"),
