@@ -1,4 +1,6 @@
-# Agent log — ตรวจและเผยแพร่ 2026-11-19
+# Agent log — ตรวจและเผยแพร่ 2026-11-19 (รอบ Copilot ใน VS Code, 15:28–15:32)
+
+> log นี้เป็นของรอบ Copilot เท่านั้น ข้อที่ว่า sub-agent ไม่เริ่มทำงานและ plugin ไม่พร้อมใช้งานเป็นข้อจำกัดของรอบนี้ — ต่อมาใน Claude Code Sub-agent 2 ตัวทำงานจริงและเรียก Plugin `superpowers` แล้ว ดู [`claude-code-session.md`](claude-code-session.md)
 
 ## เครื่องมือและขอบเขต
 

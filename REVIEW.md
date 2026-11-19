@@ -18,7 +18,9 @@
 
 เปิดใช้ Pages แบบ GitHub Actions แล้ว push ขึ้น `main`; workflow run `44488071486` ผ่านทั้ง build และ deploy. ตรวจ URL จริงหลัง deploy ได้ HTTP 200 และ `data/deals.json` ที่เผยแพร่มี 20 ดีล
 
-## ข้อจำกัดของรอบตรวจ
+## ข้อจำกัดของรอบตรวจ (รอบ 1 — Copilot ใน VS Code)
+
+> ข้อจำกัดนี้เป็นของรอบ 1 เท่านั้น — ต่อมา Sub-agent 2 ตัวใน Claude Code ทำงานจริง (ดู "รอบ 2" ด้านล่าง และส่วน "ผลตรวจโดย Agent ตรวจข้อมูล" ท้าย `DATA_ISSUES.md`) และเรียก Plugin `superpowers:verification-before-completion` แล้ว (ดู `AGENT_LOG/claude-code-session.md`)
 
 งานตรวจแยกสองรายการที่ส่งให้ sub-agent ไม่เริ่มทำงาน เพราะ runtime ตอบ `400 The requested model is not supported`; จึงไม่มีผลตรวจจาก sub-agent ให้อ้างอิง และการตรวจข้างต้นเป็นการตรวจโดยตรงพร้อมตัวตรวจอิสระใน repository. Plugin แยกต่างหากที่ระบุใน `AGENT_SETUP.md` ไม่พร้อมใช้งานในเซสชันนี้ จึงไม่มีหลักฐานการเรียก plugin.
 
